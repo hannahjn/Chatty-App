@@ -3,9 +3,11 @@ import React, {Component} from 'react';
 class Message extends Component {
   render() {
     return (
-      <nav className="navbar">
-      <a href="/" className="navbar-brand">Chatty</a>
-    </nav>
+      <div className="message">
+          <span className="message-username">{this.props.user}</span>
+          <span className="message-content">{this.props.content}</span>
+        </div>
+     
     )
   }
  
