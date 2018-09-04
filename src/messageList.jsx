@@ -3,8 +3,9 @@ import Message from './message.jsx';
 
 class MessageList extends Component {
   render() {
+    // messageArray loops through the array of objects set in app.jsx and passes the values to variables.
     const messageArray = this.props.messages.map((message) => 
-      <Message user = {message.username} content = {message.content}/>
+      <Message key={message.id} user = {message.username} content = {message.content}/>
       
     )
       return (
