@@ -9,7 +9,9 @@ class App extends Component {
     super(props);
 
     this.state = {
-        currentUser: {name: "Bob"}, // optional. if currentUser is not defined, it means the user is Anonymous
+        // type: '',
+        // id: '',
+        currentUser: {name: ''}, // optional. if currentUser is not defined, it means the user is Anonymous
         messages: [] //incoming messages will populate this array
       }
     };
@@ -32,12 +34,14 @@ class App extends Component {
 
     newMessage = (messageInput) => {
       // create a new object containing the information from the input box in chatBar.jsx
+      // console.log('newMessage username', this.state.currentUser.name);
       const newMessageObj = {
-        id:'',
-        username: 'Anonymous',
+        type: 'postMessage',
+        username: this.state.currentUser.name,
         content: messageInput
       }
       // send new message through socket. newMessageObj is an object so turn it to a string to send.
+      console.log(JSON.stringify(newMessageObj));
       this.socket.send(JSON.stringify(newMessageObj));
     
       // receive messages from the server
@@ -46,11 +50,37 @@ class App extends Component {
         console.log('event', event);
         // turn string data into a JSON object
         const incomingMessage = JSON.parse(event.data);
+        switch(incomingMessage.type) {
+          case 'incomingMessage':
+            this.setState({messages: [...this.state.messages, incomingMessage]});
+            break;
+          case 'incomingNotification':
+            this.setState({messages: [...this.state.messages, incomingMessage]});
+            break;
+          default:
+          throw new Error('Unknown event type ' + incomingMessage.type);
+        }
+      };
+    
         // add new message to total list of messages
-        const allMessages = this.state.messages.concat(incomingMessage)
         // update state to include new messages
-        this.setState({messages: allMessages});
       }
+    // }
+    
+    newUsername = (username) => {
+      const newMessageObj = {
+        type: 'postNotification',
+        oldUsername: this.state.currentUser.name,
+        username: username,
+      }
+
+      console.log('username', username);
+      this.setState({currentUser: {name: username}});
+
+      // send new message through socket. newMessageObj is an object so turn it to a string to send.
+      console.log(JSON.stringify(newMessageObj));
+      this.socket.send(JSON.stringify(newMessageObj));
+    
     }
   
   render() {
@@ -61,7 +91,7 @@ class App extends Component {
           <a href="/" className="navbar-brand">Chatty</a>
         </nav>
         {/* pass the state (user) and new messages to chatbar as props */}
-      <Chatbar user={this.state.currentUser} newMessage={this.newMessage}/>
+      <Chatbar newUsername={this.newUsername} currentUser={this.state.currentUser} newMessage={this.newMessage} type={this.state.type}/>
       {/* pass messages to message list as props */}
       <MessageList messages={this.state.messages}/>
       

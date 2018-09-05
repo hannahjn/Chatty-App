@@ -8,17 +8,25 @@ class Chatbar extends Component {
         this.props.newMessage(messageInput);
       }
     }
+  editUsername = (e) => {
+    console.log(e.key);
+    if (e.key === 'Enter' || e.key === 'Tab') {
+        const username = e.target.value;
+        console.log(e.target.value);
+        this.props.newUsername(username);
+      }
+    }
   
   
   render() {
-    const user = this.props.user.name;
+    const user = this.props.currentUser.name;
       return (
         <footer className="chatbar">
-          <input className="chatbar-username" placeholder="Your Name (Optional)" defaultValue={user}/>
+          <input onKeyDown={this.editUsername} className="chatbar-username" placeholder="Your Name (Optional)" defaultValue={user}/>
           <input onKeyPress={this.onEnterPress} className="chatbar-message" placeholder="Type a message and hit ENTER" />
         </footer>
       );
-  }   
-}
+    }  
+  }
 
 export default Chatbar;

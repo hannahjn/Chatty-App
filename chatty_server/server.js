@@ -20,23 +20,36 @@ const wss = new SocketServer({ server });
 wss.on('connection', (ws) => {
   console.log('Connection Made');
   // this is called each time data is recieved. 
-  ws.on('message', function incoming(data) {
+  ws.on('message', function incoming(messageInfo) {
     // console.log('data: ', data, typeof data);
-    if (data !== undefined && data !== 'undefined'){
-      const incomingMessageObj = JSON.parse(data);
+    if (messageInfo !== undefined && messageInfo !== 'undefined'){
+      const incomingMessageObj = JSON.parse(messageInfo);
       // turn string into object again.
-    
 
-    wss.clients.forEach(function each(client) {
-      const data = {
+
+let data = {};
+  switch (incomingMessageObj.type) {
+    case ('postMessage'):
+      data = {
+        type: 'incomingMessage',
         id: uuiv1(),
         username: incomingMessageObj.username,
         content: incomingMessageObj.content
       }
-      console.log('outgoing message', data);
+      break;
+    case ('postNotification'):
+      data ={
+        type: 'incomingNotification',
+        oldUsername: incomingMessageObj.oldUsername,
+        username:incomingMessageObj.username
+      }
+      break;
+    }
+
+    wss.clients.forEach(function each(client) {
       // if(client !== ws && client.readyState === Web.Socket.OPEN){
         client.send(JSON.stringify(data));
-        console.log('outgoing message sent');
+        // console.log('outgoing message sent');
       // }
     })
   }
