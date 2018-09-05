@@ -1,5 +1,6 @@
 const express = require('express');
 const SocketServer = require('ws').Server;
+const uuiv1 = require('uuid/v1');
 
 // Set the port to 3001
 const PORT = 3001;
@@ -22,9 +23,35 @@ wss.on('connection', (ws) => {
   ws.on('message', function incoming(data) {
     // console.log('data: ', data, typeof data);
     if (data !== undefined && data !== 'undefined'){
+      const incomingMessageObj = JSON.parse(data);
       // turn string into object again.
-    console.log(JSON.parse(data));
+    
+
+    wss.clients.forEach(function each(client) {
+      const data = {
+        id: uuiv1(),
+        username: incomingMessageObj.username,
+        content: incomingMessageObj.content
+      }
+      console.log('outgoing message', data);
+      // if(client !== ws && client.readyState === Web.Socket.OPEN){
+        client.send(JSON.stringify(data));
+        console.log('outgoing message sent');
+      // }
+    })
   }
+
+  // wss.broadcast = function broadcast(data) {
+  //   wss.clients.forEach(function each(client) {
+  //     if (client.readyState === WebSocket.OPEN) {
+  //       client.send(data);
+  //       console.log('outgoing', data)
+  //     } else {
+  //       console.log('fail');
+  //     }
+  //   });
+  // };
+
   });
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
   ws.on('close', () => console.log('Client disconnected'));

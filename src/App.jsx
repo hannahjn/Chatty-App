@@ -10,32 +10,20 @@ class App extends Component {
 
     this.state = {
         currentUser: {name: "Bob"}, // optional. if currentUser is not defined, it means the user is Anonymous
-        messages: [
-          {
-            id: 1,
-            username: "Bob",
-            content: "Has anyone seen my marbles?",
-          },
-          {
-            id: 2,
-            username: "Anonymous",
-            content: "No, I think you lost them. You lost your marbles Bob. You lost them for good."
-          }
-        ]
+        messages: [] //incoming messages will populate this array
       }
     };
     componentDidMount() {
       console.log("componentDidMount <App />");
       setTimeout(() => {
         console.log("Simulating incoming message");
+        const newMessage = {username: "Michelle", content: "Hello there!"};
         // Add a new message to the list of messages in the data store
-        const newMessage = {id: 3, username: "Michelle", content: "Hello there!"};
         const messages = this.state.messages.concat(newMessage)
-        // Update the state of the app component.
         // Calling setState will trigger a call to render() in App and all child components.
         this.setState({messages: messages})
       }, 3000);
-      
+      // set up client-side websocket server
       this.socket = new WebSocket("ws://localhost:3001/");
       this.socket.onopen = () => {
         this.socket.send(console.log('connected to server'));
@@ -45,19 +33,26 @@ class App extends Component {
     newMessage = (messageInput) => {
       // create a new object containing the information from the input box in chatBar.jsx
       const newMessageObj = {
-        id: (this.state.messages.length) + 1,
+        id:'',
         username: 'Anonymous',
         content: messageInput
       }
-      // update state to include the newly generated object.
-      const newMessages = this.state.messages.concat(newMessageObj);
-      this.setState({messages: newMessages});
       // send new message through socket. newMessageObj is an object so turn it to a string to send.
       this.socket.send(JSON.stringify(newMessageObj));
-    }
-
-   
     
+      // receive messages from the server
+      this.socket.onmessage = (event) => {
+        // console.log for debugging purposes.
+        console.log('event', event);
+        // turn string data into a JSON object
+        const incomingMessage = JSON.parse(event.data);
+        // add new message to total list of messages
+        const allMessages = this.state.messages.concat(incomingMessage)
+        // update state to include new messages
+        this.setState({messages: allMessages});
+      }
+    }
+  
   render() {
     
     return (
@@ -65,7 +60,9 @@ class App extends Component {
         <nav className="navbar">
           <a href="/" className="navbar-brand">Chatty</a>
         </nav>
+        {/* pass the state (user) and new messages to chatbar as props */}
       <Chatbar user={this.state.currentUser} newMessage={this.newMessage}/>
+      {/* pass messages to message list as props */}
       <MessageList messages={this.state.messages}/>
       
       </div>
@@ -74,21 +71,3 @@ class App extends Component {
 }
 
 export default App;
-
-
-// componentDidMount() {
-//   // use fetch api
-//   fetch('https://jsonplaceholder.typicode.com/posts')
-//     then(resp => resp.JSON())
-//     then(posts=> this.setState({ posts }))
-  
-    // const postList = ({ posts }) => (
-    //   <div className="post-list">
-    //   <ul> {posts.map(p => <post key={p.id} post={p}/>)}</ul>
-    //   </div>
-    // );
-    
-    // const post = ({ post }) => (
-    //   <li className="post">{post.title}</li>
-    // );
-  // }
