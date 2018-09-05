@@ -35,6 +35,11 @@ class App extends Component {
         // Calling setState will trigger a call to render() in App and all child components.
         this.setState({messages: messages})
       }, 3000);
+      
+      this.socket = new WebSocket("ws://localhost:3001/");
+      this.socket.onopen = () => {
+        this.socket.send(console.log('connected to server'));
+      }
     }
 
     newMessage = (messageInput) => {
@@ -47,6 +52,8 @@ class App extends Component {
       // update state to include the newly generated object.
       const newMessages = this.state.messages.concat(newMessageObj);
       this.setState({messages: newMessages});
+      // send new message through socket. newMessageObj is an object so turn it to a string to send.
+      this.socket.send(JSON.stringify(newMessageObj));
     }
 
    
