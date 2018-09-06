@@ -9,8 +9,7 @@ class App extends Component {
     super(props);
 
     this.state = {
-        // type: '',
-        // id: '',
+        clientCount: '',
         currentUser: {name: ''}, // optional. if currentUser is not defined, it means the user is Anonymous
         messages: [] //incoming messages will populate this array
       }
@@ -30,6 +29,28 @@ class App extends Component {
       this.socket.onopen = () => {
         this.socket.send(console.log('connected to server'));
       }
+      this.socket.onmessage = (event) => {
+        // console.log for debugging purposes.
+        console.log('event', event.data);
+        // turn string data into a JSON object
+        const incomingMessage = JSON.parse(event.data);
+        console.log(incomingMessage);
+        switch(incomingMessage.type) {
+          // add any incoming message to the message list
+          case 'incomingMessage':
+            this.setState({messages: [...this.state.messages, incomingMessage]});
+            break; //using '...' allows us to access the current state and add to it, rather than replace it. 
+          case 'incomingNotification':
+            this.setState({messages: [...this.state.messages, incomingMessage]});
+            break;
+          case 'count':
+            this.setState({clientCount: incomingMessage.connectionCount});
+            console.log('connection count: ', this.state);
+            break;
+          default:
+          throw new Error('Unknown event type ' + incomingMessage.type);
+        }
+      };
     }
 
     newMessage = (messageInput) => {
@@ -45,27 +66,8 @@ class App extends Component {
       this.socket.send(JSON.stringify(newMessageObj));
     
       // receive messages from the server
-      this.socket.onmessage = (event) => {
-        // console.log for debugging purposes.
-        console.log('event', event);
-        // turn string data into a JSON object
-        const incomingMessage = JSON.parse(event.data);
-        switch(incomingMessage.type) {
-          case 'incomingMessage':
-            this.setState({messages: [...this.state.messages, incomingMessage]});
-            break;
-          case 'incomingNotification':
-            this.setState({messages: [...this.state.messages, incomingMessage]});
-            break;
-          default:
-          throw new Error('Unknown event type ' + incomingMessage.type);
-        }
-      };
-    
-        // add new message to total list of messages
-        // update state to include new messages
-      }
-    // }
+     
+    }
     
     newUsername = (username) => {
       const newMessageObj = {
@@ -89,6 +91,7 @@ class App extends Component {
       <div>
         <nav className="navbar">
           <a href="/" className="navbar-brand">Chatty</a>
+        <div>{this.state.clientCount}</div>
         </nav>
         {/* pass the state (user) and new messages to chatbar as props */}
       <Chatbar newUsername={this.newUsername} currentUser={this.state.currentUser} newMessage={this.newMessage} type={this.state.type}/>

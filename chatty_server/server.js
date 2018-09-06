@@ -17,55 +17,76 @@ const wss = new SocketServer({ server });
 // Set up a callback that will run when a client connects to the server
 // When a client connects they are assigned a socket, represented by
 // the ws parameter in the callback.
+
 wss.on('connection', (ws) => {
-  console.log('Connection Made');
+  console.log('Connection Made. ');
+
+// populate the clientData object with the client ID and number of clients
+ let clientCount = {
+   type: 'count',
+   connectionCount: wss.clients.size
+ }
+ wss.clients.forEach(function (client) {
+  // if(client !== ws && client.readyState === Web.Socket.OPEN){
+    client.send(JSON.stringify(clientCount));
+    console.log(clientCount);
+    // console.log('outgoing message sent');
+    // }
+  })
+  
+
+
   // this is called each time data is recieved. 
   ws.on('message', function incoming(messageInfo) {
     // console.log('data: ', data, typeof data);
     if (messageInfo !== undefined && messageInfo !== 'undefined'){
-      const incomingMessageObj = JSON.parse(messageInfo);
       // turn string into object again.
-
-
-let data = {};
-  switch (incomingMessageObj.type) {
-    case ('postMessage'):
-      data = {
-        type: 'incomingMessage',
-        id: uuiv1(),
-        username: incomingMessageObj.username,
-        content: incomingMessageObj.content
+      const incomingMessageObj = JSON.parse(messageInfo);
+      
+      // on receiving a message, depending on the type, build it into an object to be sent back.
+      let data = {};
+      switch (incomingMessageObj.type) {
+        case ('postMessage'):
+        data = {
+          type: 'incomingMessage',
+          id: uuiv1(),
+          username: incomingMessageObj.username,
+          content: incomingMessageObj.content
+        }
+        break;
+        case ('postNotification'):
+        data ={
+          type: 'incomingNotification',
+          oldUsername: incomingMessageObj.oldUsername,
+          username:incomingMessageObj.username
+        }
+        break;
       }
-      break;
-    case ('postNotification'):
-      data ={
-        type: 'incomingNotification',
-        oldUsername: incomingMessageObj.oldUsername,
-        username:incomingMessageObj.username
+      
+      wss.clients.forEach(function each(client) {
+        // if(client !== ws && client.readyState === Web.Socket.OPEN){
+          client.send(JSON.stringify(data));
+          // console.log('outgoing message sent');
+          // }
+        })
       }
-      break;
-    }
 
-    wss.clients.forEach(function each(client) {
-      // if(client !== ws && client.readyState === Web.Socket.OPEN){
-        client.send(JSON.stringify(data));
-        // console.log('outgoing message sent');
-      // }
-    })
-  }
-
-  // wss.broadcast = function broadcast(data) {
-  //   wss.clients.forEach(function each(client) {
-  //     if (client.readyState === WebSocket.OPEN) {
-  //       client.send(data);
-  //       console.log('outgoing', data)
-  //     } else {
-  //       console.log('fail');
-  //     }
-  //   });
-  // };
 
   });
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
-  ws.on('close', () => console.log('Client disconnected'));
+  ws.on('close', () => {
+    let clientCount = {
+      type: 'count',
+      connectionCount: wss.clients.size
+    }
+    wss.clients.forEach(function (client) {
+     // if(client !== ws && client.readyState === Web.Socket.OPEN){
+       client.send(JSON.stringify(clientCount));
+       console.log(clientCount);
+       // console.log('outgoing message sent');
+       // }
+     })
+    
+    console.log('Client disconnected. ');
+    })
 });
