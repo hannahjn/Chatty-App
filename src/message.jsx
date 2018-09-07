@@ -4,8 +4,7 @@ class Message extends Component {
   render() {
     return (
       <div className="message">
-      {/* values from messageArray in messageList */}
-        <span className="message-username">{this.props.user}</span>
+        <span className="message-username" style={{color:this.props.colour}}>{this.props.user} </span>
         <span className="message-content">{this.props.content}</span>
       </div>
      

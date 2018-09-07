@@ -1,6 +1,8 @@
 const express = require('express');
 const SocketServer = require('ws').Server;
 const uuiv1 = require('uuid/v1');
+const randomColour = require('randomcolor');
+
 
 // Set the port to 3001
 const PORT = 3001;
@@ -24,17 +26,18 @@ wss.on('connection', (ws) => {
 // populate the clientData object with the client ID and number of clients
  let clientCount = {
    type: 'count',
-   connectionCount: wss.clients.size
+   connectionCount: wss.clients.size,
  }
  wss.clients.forEach(function (client) {
-  // if(client !== ws && client.readyState === Web.Socket.OPEN){
     client.send(JSON.stringify(clientCount));
     console.log(clientCount);
-    // console.log('outgoing message sent');
-    // }
   })
-  
 
+  let clientColour = {
+    type: 'colour',
+    clientColour: randomColour(),
+  }
+    ws.send(JSON.stringify(clientColour));
 
   // this is called each time data is recieved. 
   ws.on('message', function incoming(messageInfo) {
@@ -50,15 +53,17 @@ wss.on('connection', (ws) => {
         data = {
           type: 'incomingMessage',
           id: uuiv1(),
+          clientColour: incomingMessageObj.clientColour,
           username: incomingMessageObj.username,
-          content: incomingMessageObj.content
+          content: incomingMessageObj.content 
         }
         break;
         case ('postNotification'):
         data ={
           type: 'incomingNotification',
           oldUsername: incomingMessageObj.oldUsername,
-          username:incomingMessageObj.username
+          username:incomingMessageObj.username,
+          id: uuiv1(),
         }
         break;
       }

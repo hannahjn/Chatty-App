@@ -10,20 +10,21 @@ class App extends Component {
 
     this.state = {
         clientCount: '',
-        currentUser: {name: ''}, // optional. if currentUser is not defined, it means the user is Anonymous
+        clientColour:'',
+        currentUser: {name: 'Anonymous'}, // optional. if currentUser is not defined, it means the user is Anonymous
         messages: [] //incoming messages will populate this array
       }
     };
     componentDidMount() {
-      console.log("componentDidMount <App />");
-      setTimeout(() => {
-        console.log("Simulating incoming message");
-        const newMessage = {username: "Michelle", content: "Hello there!"};
-        // Add a new message to the list of messages in the data store
-        const messages = this.state.messages.concat(newMessage)
-        // Calling setState will trigger a call to render() in App and all child components.
-        this.setState({messages: messages})
-      }, 3000);
+      // console.log("componentDidMount <App />");
+      // setTimeout(() => {
+      //   console.log("Simulating incoming message");
+      //   const newMessage = {username: "Michelle", content: "Hello there!"};
+      //   // Add a new message to the list of messages in the data store
+      //   const messages = this.state.messages.concat(newMessage)
+      //   // Calling setState will trigger a call to render() in App and all child components.
+      //   this.setState({messages: messages})
+      // }, 3000);
       // set up client-side websocket server
       this.socket = new WebSocket("ws://localhost:3001/");
       this.socket.onopen = () => {
@@ -31,10 +32,10 @@ class App extends Component {
       }
       this.socket.onmessage = (event) => {
         // console.log for debugging purposes.
-        console.log('event', event.data);
+        // console.log('event', event.data);
         // turn string data into a JSON object
         const incomingMessage = JSON.parse(event.data);
-        console.log(incomingMessage);
+        // console.log(incomingMessage);
         switch(incomingMessage.type) {
           // add any incoming message to the message list
           case 'incomingMessage':
@@ -45,7 +46,10 @@ class App extends Component {
             break;
           case 'count':
             this.setState({clientCount: incomingMessage.connectionCount});
-            console.log('connection count: ', this.state);
+            break;
+          case 'colour':
+            this.setState({clientColour: incomingMessage.clientColour});
+            console.log('Cpmpleted State: ', this.state);
             break;
           default:
           throw new Error('Unknown event type ' + incomingMessage.type);
@@ -59,10 +63,11 @@ class App extends Component {
       const newMessageObj = {
         type: 'postMessage',
         username: this.state.currentUser.name,
+        clientColour: this.state.clientColour,
         content: messageInput
       }
       // send new message through socket. newMessageObj is an object so turn it to a string to send.
-      console.log(JSON.stringify(newMessageObj));
+      // console.log(JSON.stringify(newMessageObj));
       this.socket.send(JSON.stringify(newMessageObj));
     
       // receive messages from the server
@@ -76,11 +81,11 @@ class App extends Component {
         username: username,
       }
 
-      console.log('username', username);
+      // console.log('username', username);
       this.setState({currentUser: {name: username}});
 
       // send new message through socket. newMessageObj is an object so turn it to a string to send.
-      console.log(JSON.stringify(newMessageObj));
+      // console.log(JSON.stringify(newMessageObj));
       this.socket.send(JSON.stringify(newMessageObj));
     
     }
