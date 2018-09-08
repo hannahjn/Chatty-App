@@ -2,20 +2,22 @@ import React, {Component} from 'react';
 
 class Chatbar extends Component {
   
+  // if the enter key is pressed, assign new message prop the value of message input
   onEnterPress = (e) => {
       if (e.key === 'Enter') {
         const messageInput = e.target.value;
         this.props.newMessage(messageInput);
       }
     }
+  // if the enter key is pressed, assign username prop the value of username input
   editUsername = (e) => {
     console.log(e.key);
     if (e.key === 'Enter' || e.key === 'Tab') {
         const username = e.target.value;
-        console.log(e.target.value);
         this.props.newUsername(username);
       }
     }
+  
   
   
   render() {

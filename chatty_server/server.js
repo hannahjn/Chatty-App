@@ -17,13 +17,10 @@ const server = express()
 const wss = new SocketServer({ server });
 
 // Set up a callback that will run when a client connects to the server
-// When a client connects they are assigned a socket, represented by
-// the ws parameter in the callback.
-
 wss.on('connection', (ws) => {
   console.log('Connection Made. ');
 
-// populate the clientData object with the client ID and number of clients
+// an object to send the number of connected clients for the client counter.
  let clientCount = {
    type: 'count',
    connectionCount: wss.clients.size,
@@ -33,17 +30,18 @@ wss.on('connection', (ws) => {
     console.log(clientCount);
   })
 
+  // an object to assign a random colour to a new client.
   let clientColour = {
     type: 'colour',
     clientColour: randomColour(),
   }
     ws.send(JSON.stringify(clientColour));
 
+    
   // this is called each time data is recieved. 
   ws.on('message', function incoming(messageInfo) {
-    // console.log('data: ', data, typeof data);
     if (messageInfo !== undefined && messageInfo !== 'undefined'){
-      // turn string into object again.
+      // turn received string into an object again.
       const incomingMessageObj = JSON.parse(messageInfo);
       
       // on receiving a message, depending on the type, build it into an object to be sent back.
@@ -69,27 +67,21 @@ wss.on('connection', (ws) => {
       }
       
       wss.clients.forEach(function each(client) {
-        // if(client !== ws && client.readyState === Web.Socket.OPEN){
           client.send(JSON.stringify(data));
-          // console.log('outgoing message sent');
-          // }
         })
       }
-
-
   });
+
+
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
   ws.on('close', () => {
+    // send client number to update client counter.
     let clientCount = {
       type: 'count',
       connectionCount: wss.clients.size
     }
     wss.clients.forEach(function (client) {
-     // if(client !== ws && client.readyState === Web.Socket.OPEN){
        client.send(JSON.stringify(clientCount));
-       console.log(clientCount);
-       // console.log('outgoing message sent');
-       // }
      })
     
     console.log('Client disconnected. ');
