@@ -27,7 +27,6 @@ wss.on('connection', (ws) => {
  }
  wss.clients.forEach(function (client) {
     client.send(JSON.stringify(clientCount));
-    console.log(clientCount);
   })
 
   // an object to assign a random colour to a new client.
