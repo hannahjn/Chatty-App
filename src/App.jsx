@@ -12,9 +12,10 @@ class App extends Component {
         clientCount: '',
         clientColour:'',
         currentUser: {name: 'Anonymous'}, // optional. if currentUser is not defined, it means the user is Anonymous
-        messages: [] //incoming messages will populate this array
+        messages: []
       }
     };
+  
     componentDidMount() {
 
       // set up client-side websocket server
@@ -24,14 +25,13 @@ class App extends Component {
       }
       this.socket.onmessage = (event) => {
         
-        // turn newly received string data into a JSON object.
         const incomingMessage = JSON.parse(event.data);
         
         switch(incomingMessage.type) {
           // add any incoming message to the message list
           case 'incomingMessage':
             this.setState({messages: [...this.state.messages, incomingMessage]});
-            break; //using '...' allows us to access the current state and add to it, rather than replace it. 
+            break;
           case 'incomingNotification':
             this.setState({messages: [...this.state.messages, incomingMessage]});
             break;
@@ -56,7 +56,6 @@ class App extends Component {
         clientColour: this.state.clientColour,
         content: messageInput
       }
-      // send new message through socket. newMessageObj is an object so turn it to a string to send.
       this.socket.send(JSON.stringify(newMessageObj));
     }
     
@@ -78,12 +77,9 @@ class App extends Component {
       <div>
         <nav className="navbar">
           <a href="/" className="navbar-brand">Chatty</a>
-          {/* show the number of connected clients in the chatbar. */}
         <div>Users Online:{this.state.clientCount}</div>
         </nav>
-        {/* pass the state (user) and new messages to chatbar as props */}
       <Chatbar newUsername={this.newUsername} currentUser={this.state.currentUser} newMessage={this.newMessage} type={this.state.type}/>
-      {/* pass messages to message list as props */}
       <MessageList messages={this.state.messages}/>
       
       </div>
