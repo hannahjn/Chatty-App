@@ -1,15 +1,15 @@
 Chatty App
 =====================
 
-A simple, single page messenger app.
+A simple, single page messenger app using React and Webpack to send messages and alerts in a chatroom.
 
 ### Installation
 
 ```
 npm install
 npm start
-open http://localhost:3000
 ```
+Then, navigate to localhost:3000
 
 ### Linting
 
@@ -23,5 +23,5 @@ npm run lint
 
 * React
 * Webpack
-* [babel-loader](https://github.com/babel/babel-loader)
-* [webpack-dev-server](https://github.com/webpack/webpack-dev-server)
+* babel-loader (https://github.com/babel/babel-loader)
+* webpack-dev-server (https://github.com/webpack/webpack-dev-server)
